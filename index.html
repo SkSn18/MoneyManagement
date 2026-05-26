@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家計簿</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- ナビゲーション -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-logo">家計簿</span>
+      <div class="nav-links">
+        <a href="#" class="nav-link" data-view="dashboard">ホーム</a>
+        <a href="#" class="nav-link" data-view="list">一覧</a>
+        <a href="#" class="nav-link nav-link--add" data-view="form">＋ 追加</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- メインコンテンツ（JS が中身を差し替える） -->
+  <main id="app" class="main">
+    <p style="text-align:center; color:#64748b; padding:60px 0;">読み込み中…</p>
+  </main>
+
+  <!--
+    スクリプトの読み込み順序に注意。
+    依存するファイルより先に読み込まれている必要がある。
+
+    読み込み順:
+      1. utils（依存なし）
+      2. data（utils に依存）
+      3. utils/csv（data/categories, utils/format に依存）
+      4. state（utils に依存）
+      5. ui（data, state, utils すべてに依存）
+      6. main（すべてに依存）
+  -->
+
+  <!-- utils -->
+  <script src="js/utils/date.js"></script>
+  <script src="js/utils/format.js"></script>
+  <script src="js/utils/validate.js"></script>
+
+  <!-- data -->
+  <script src="js/data/categories.js"></script>
+  <script src="js/data/storage.js"></script>
+  <script src="js/data/transactions.js"></script>
+
+  <!-- csv（categories.js, format.js に依存） -->
+  <script src="js/utils/csv.js"></script>
+
+  <!-- state -->
+  <script src="js/state.js"></script>
+
+  <!-- ui -->
+  <script src="js/ui/dashboard.js"></script>
+  <script src="js/ui/list.js"></script>
+  <script src="js/ui/form.js"></script>
+
+  <!-- エントリポイント -->
+  <script src="js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+/* ==========================================
+   リセット・CSS変数
+   ========================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg:      #f8fafc;
+  --color-card:    #ffffff;
+  --color-border:  #e2e8f0;
+  --color-text:    #1e293b;
+  --color-muted:   #64748b;
+  --color-primary:       #2563eb;
+  --color-primary-dark:  #1d4ed8;
+  --color-primary-light: #eff6ff;
+  --color-income:        #16a34a;
+  --color-income-light:  #f0fdf4;
+  --color-expense:       #dc2626;
+  --color-expense-light: #fef2f2;
+  --color-asset:         #9333ea;
+  --color-asset-light:   #faf5ff;
+  --radius:              8px;
+  --shadow:              0 1px 3px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .06);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ==========================================
+   ナビゲーション
+   ========================================== */
+.nav {
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.nav-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-primary);
+  margin-right: auto;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.nav-link {
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background .15s, color .15s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nav-link:hover,
+.nav-link--active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.nav-link--add {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.nav-link--add:hover {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+/* ==========================================
+   メインコンテンツ
+   ========================================== */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* ==========================================
+   ページ共通レイアウト
+   ========================================== */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  flex: 1;
+}
+
+/* ==========================================
+   月ナビゲーション
+   ========================================== */
+.month-nav {
+  display: flex;
+  gap: 4px;
+}
+
+/* ==========================================
+   サマリーカード（ダッシュボード）
+   ========================================== */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid transparent;
+}
+
+.summary-card--income  { border-color: var(--color-income); }
+.summary-card--expense { border-color: var(--color-expense); }
+.summary-card--asset   { border-color: var(--color-asset); }
+.summary-card--balance { border-color: var(--color-primary); }
+
+.summary-label {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-bottom: 4px;
+}
+
+.summary-amount {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ==========================================
+   セクション（直近の取引など）
+   ========================================== */
+.section {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+}
+
+/* ==========================================
+   取引リスト
+   ========================================== */
+.tx-list {
+  list-style: none;
+}
+
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.tx-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tx-item:first-child {
+  padding-top: 0;
+}
+
+.tx-icon {
+  font-size: 22px;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.tx-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-date {
+  display: block;
+  font-size: 12px;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-amount {
+  font-weight: 600;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.tx-amount--income  { color: var(--color-income); }
+.tx-amount--expense { color: var(--color-expense); }
+.tx-amount--asset   { color: var(--color-asset); }
+
+.tx-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   フィルタバー（取引一覧）
+   ========================================== */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+
+.filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filter-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+/* ==========================================
+   空状態メッセージ
+   ========================================== */
+.empty-text {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* ==========================================
+   ユーティリティ
+   ========================================== */
+.text-danger { color: var(--color-expense); }
+
+/* ==========================================
+   レスポンシブ（スマホ幅）
+   ========================================== */
+@media (max-width: 480px) {
+  .summary-amount {
+    font-size: 17px;
+  }
+
+  .nav-link {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+
+  .page-title {
+    font-size: 17px;
+  }
+}
