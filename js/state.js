@@ -7,6 +7,7 @@ const appState = {
   transactions:     [],
   editingId:        null,
   filterType:       'all',
+  displayMode:      'monthly',  // 'monthly' | 'yearly' | 'cumulative'
 };
 
 let _renderer = null;

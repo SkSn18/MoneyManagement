@@ -34,6 +34,24 @@ function getTodayString() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
+// 全取引データの最古年月から現在月までの配列を返す（プルダウン選択肢の生成に使用）
+function getMonthRange(allTransactions) {
+  const current = getCurrentYearMonth();
+  if (!allTransactions || allTransactions.length === 0) return [current];
+
+  const oldest = allTransactions
+    .map(t => t.date.slice(0, 7))
+    .reduce((a, b) => (a < b ? a : b));
+
+  const result = [];
+  let ym = oldest;
+  while (ym <= current) {
+    result.push(ym);
+    ym = getNextMonth(ym);
+  }
+  return result;
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { getCurrentYearMonth, formatYearMonth, formatDate, getNextMonth, getPrevMonth, getTodayString };
+  module.exports = { getCurrentYearMonth, formatYearMonth, formatDate, getNextMonth, getPrevMonth, getTodayString, getMonthRange };
 }

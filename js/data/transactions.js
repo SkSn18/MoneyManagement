@@ -41,6 +41,25 @@ async function updateTransaction(id, changes) {
   return all;
 }
 
+async function addTransactions(dataArray) {
+  const all = await loadTransactions();
+  const now = new Date().toISOString();
+  dataArray.forEach(data => {
+    all.push({
+      id:         crypto.randomUUID(),
+      type:       data.type,
+      amount:     Number(data.amount),
+      categoryId: data.categoryId,
+      date:       data.date,
+      memo:       data.memo || '',
+      createdAt:  now,
+      updatedAt:  now,
+    });
+  });
+  await saveTransactions(all);
+  return all;
+}
+
 async function deleteTransaction(id) {
   const all      = await loadTransactions();
   const filtered = all.filter(t => t.id !== id);
@@ -62,6 +81,30 @@ function calcSummary(transactions) {
   return { income, expense, asset, balance: income - expense - asset };
 }
 
+function calcSummaryByCategory(transactions, type) {
+  const result = {};
+  transactions
+    .filter(t => t.type === type)
+    .forEach(t => {
+      result[t.categoryId] = (result[t.categoryId] || 0) + t.amount;
+    });
+  return result;
+}
+
+function calcMonthlySummary(allTransactions, baseYearMonth, count) {
+  const months = [];
+  let ym = baseYearMonth;
+  for (let i = 0; i < count; i++) {
+    months.unshift(ym);
+    ym = getPrevMonth(ym);
+  }
+  return months.map(m => {
+    const txs = allTransactions.filter(t => t.date.startsWith(m));
+    const s = calcSummary(txs);
+    return { ym: m, income: s.income, expense: s.expense };
+  });
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { calcSummary };
+  module.exports = { calcSummary, calcSummaryByCategory, calcMonthlySummary, addTransactions };
 }

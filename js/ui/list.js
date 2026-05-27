@@ -9,15 +9,18 @@ function renderList(container) {
 
   const filterTypes = ['all', 'income', 'expense', 'asset'];
 
+  // 月プルダウン選択肢（新しい順）
+  const monthRange = getMonthRange(state.transactions).slice().reverse();
+  const ymOptions  = monthRange.map(m =>
+    `<option value="${m}"${m === ym ? ' selected' : ''}>${formatYearMonth(m)}</option>`
+  ).join('');
+
   container.innerHTML = `
     <div class="page">
       <div class="page-header">
-        <h1 class="page-title">${formatYearMonth(ym)}</h1>
-        <div class="month-nav">
-          <button class="btn btn--ghost" id="btn-prev-month">＜</button>
-          <button class="btn btn--ghost" id="btn-next-month">＞</button>
-        </div>
-        <button class="btn btn--ghost" id="btn-export" title="CSVダウンロード">CSV</button>
+        <h1 class="page-title">取引一覧</h1>
+        <select class="form-select select-ym" id="select-ym">${ymOptions}</select>
+        <button class="btn btn--ghost" id="btn-export">CSV出力</button>
       </div>
 
       <div class="filter-bar">
@@ -34,20 +37,16 @@ function renderList(container) {
     </div>
   `;
 
+  document.getElementById('select-ym').addEventListener('change', e => {
+    setState({ currentYearMonth: e.target.value, filterType: 'all' });
+  });
+
   // CSVエクスポート（表示中のデータをダウンロード）
   document.getElementById('btn-export').addEventListener('click', () => {
     const csv      = transactionsToCsv(filtered);
     const label    = formatYearMonth(ym).replace('年', '-').replace('月', '');
     const filename = `家計簿_${label}.csv`;
     downloadCsv(csv, filename);
-  });
-
-  // 月ナビゲーション（TD-08: 月を変えたらフィルタをリセット）
-  document.getElementById('btn-prev-month').addEventListener('click', () => {
-    setState({ currentYearMonth: getPrevMonth(ym), filterType: 'all' });
-  });
-  document.getElementById('btn-next-month').addEventListener('click', () => {
-    setState({ currentYearMonth: getNextMonth(ym), filterType: 'all' });
   });
 
   container.querySelectorAll('.filter-btn').forEach(btn => {

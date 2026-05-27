@@ -1,23 +1,59 @@
 function renderDashboard(container) {
-  const state = getState();
-  const ym    = state.currentYearMonth;
+  const state  = getState();
+  const ym     = state.currentYearMonth;
+  const mode   = state.displayMode || 'monthly';
+  const allTxs = state.transactions;
 
-  const monthTxs = state.transactions.filter(t => t.date.startsWith(ym));
-  const summary  = calcSummary(monthTxs);
+  // モードごとに表示対象のデータを決定
+  let displayTxs, summary, titleText, chartYm, barCount;
 
-  const recent = monthTxs
+  if (mode === 'monthly') {
+    displayTxs = allTxs.filter(t => t.date.startsWith(ym));
+    summary    = calcSummary(displayTxs);
+    titleText  = formatYearMonth(ym);
+    chartYm    = ym;
+    barCount   = 12;
+  } else if (mode === 'yearly') {
+    const curYm   = getCurrentYearMonth();
+    const ymSet   = new Set(calcMonthlySummary(allTxs, curYm, 12).map(m => m.ym));
+    displayTxs = allTxs.filter(t => ymSet.has(t.date.slice(0, 7)));
+    summary    = calcSummary(displayTxs);
+    titleText  = '直近12ヶ月';
+    chartYm    = curYm;
+    barCount   = 12;
+  } else {
+    displayTxs = allTxs;
+    summary    = calcSummary(allTxs);
+    titleText  = '全期間';
+    chartYm    = getCurrentYearMonth();
+    barCount   = Math.max(getMonthRange(allTxs).length, 1);
+  }
+
+  const recent = displayTxs
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5);
 
+  // 月プルダウン選択肢（単月モードのみ表示、新しい順）
+  const monthRange = getMonthRange(allTxs).slice().reverse();
+  const ymOptions  = monthRange.map(m =>
+    `<option value="${m}"${m === ym ? ' selected' : ''}>${formatYearMonth(m)}</option>`
+  ).join('');
+
+  const barTitle = mode === 'cumulative' ? '月次収支（全期間）' : '月次収支（直近12ヶ月）';
+
   container.innerHTML = `
     <div class="page">
       <div class="page-header">
-        <h1 class="page-title">${formatYearMonth(ym)}</h1>
-        <div class="month-nav">
-          <button class="btn btn--ghost" id="btn-prev-month">＜</button>
-          <button class="btn btn--ghost" id="btn-next-month">＞</button>
-        </div>
+        <h1 class="page-title">${titleText}</h1>
+        <select class="form-select select-ym${mode !== 'monthly' ? ' select-ym--hidden' : ''}"
+          id="select-ym">${ymOptions}</select>
+      </div>
+
+      <div class="mode-tabs">
+        <button class="mode-tab${mode === 'monthly'    ? ' mode-tab--active' : ''}" data-mode="monthly">単月</button>
+        <button class="mode-tab${mode === 'yearly'     ? ' mode-tab--active' : ''}" data-mode="yearly">1年</button>
+        <button class="mode-tab${mode === 'cumulative' ? ' mode-tab--active' : ''}" data-mode="cumulative">累計</button>
       </div>
 
       <div class="summary-grid">
@@ -41,23 +77,41 @@ function renderDashboard(container) {
         </div>
       </div>
 
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h2 class="chart-title">支出内訳</h2>
+          <div class="chart-wrap">
+            <canvas id="chart-expense-pie"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h2 class="chart-title">${barTitle}</h2>
+          <div class="chart-wrap">
+            <canvas id="chart-monthly-bar"></canvas>
+          </div>
+        </div>
+      </div>
+
       <div class="section">
         <div class="section-header">
           <h2 class="section-title">直近の取引</h2>
           <button class="btn btn--text" id="btn-view-all">すべて見る</button>
         </div>
         ${recent.length === 0
-          ? '<p class="empty-text">今月の取引はまだありません</p>'
+          ? '<p class="empty-text">取引はありません</p>'
           : `<ul class="tx-list">${recent.map(renderTxItem).join('')}</ul>`}
       </div>
     </div>
   `;
 
-  document.getElementById('btn-prev-month').addEventListener('click', () => {
-    setState({ currentYearMonth: getPrevMonth(ym) });
-  });
-  document.getElementById('btn-next-month').addEventListener('click', () => {
-    setState({ currentYearMonth: getNextMonth(ym) });
+  if (mode === 'monthly') {
+    document.getElementById('select-ym').addEventListener('change', e => {
+      setState({ currentYearMonth: e.target.value });
+    });
+  }
+
+  container.querySelectorAll('.mode-tab').forEach(btn => {
+    btn.addEventListener('click', () => setState({ displayMode: btn.dataset.mode }));
   });
 
   document.getElementById('btn-view-all').addEventListener('click', () => {
@@ -69,6 +123,9 @@ function renderDashboard(container) {
       setState({ currentView: 'form', editingId: el.dataset.id });
     });
   });
+
+  renderExpensePieChart('chart-expense-pie', displayTxs);
+  renderMonthlyBarChart('chart-monthly-bar', allTxs, chartYm, barCount);
 }
 
 // 取引1件分の <li> HTML を返す（ダッシュボード・一覧で共用）
