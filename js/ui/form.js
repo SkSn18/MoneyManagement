@@ -1,7 +1,6 @@
 // 入力行の状態をモジュール変数で管理（appState には載せない）
-let _rows       = [];
-let _editingId  = null;
-let _wasEditing = false;
+let _rows        = [];
+let _editingId   = null;
 let _showSuccess = false;
 let _successCount = 0;
 
@@ -100,13 +99,11 @@ function renderForm(container) {
 
   if (incomingEditId) {
     const tx = state.transactions.find(t => t.id === incomingEditId);
-    _rows       = tx ? [txToRow(tx)] : [createEmptyRow()];
-    _wasEditing = true;
-    _editingId  = incomingEditId;
+    _rows      = tx ? [txToRow(tx)] : [createEmptyRow()];
+    _editingId = incomingEditId;
   } else {
-    if (_wasEditing) {
-      _rows       = [createEmptyRow()];
-      _wasEditing = false;
+    if (_editingId !== null) {
+      _rows = [createEmptyRow()];
     } else if (_rows.length === 0) {
       _rows = [createEmptyRow()];
     }
