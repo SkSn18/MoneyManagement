@@ -21,17 +21,22 @@ function renderExpensePieChart(canvasId, transactions) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
+  const parent = canvas.parentElement;
+  parent.querySelectorAll('.chart-empty-text').forEach(el => el.remove());
+
   const byCategory = calcSummaryByCategory(transactions, 'expense');
   const entries = Object.entries(byCategory).filter(([, v]) => v > 0);
 
   if (entries.length === 0) {
     canvas.style.display = 'none';
     const msg = document.createElement('p');
-    msg.className = 'empty-text';
+    msg.className = 'chart-empty-text empty-text';
     msg.textContent = '支出データがありません';
-    canvas.parentElement.appendChild(msg);
+    parent.appendChild(msg);
     return;
   }
+
+  canvas.style.display = '';
 
   const labels = entries.map(([id]) => {
     const cat = getCategoryById(id);
