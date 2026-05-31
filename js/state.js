@@ -6,6 +6,8 @@ const appState = {
   currentYearMonth: getCurrentYearMonth(),
   transactions:     [],
   recurring:        [],
+  customCategories: [],
+  budgets:          {},
   editingId:        null,
   filterType:       'all',
   filterKeyword:    '',

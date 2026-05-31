@@ -1,9 +1,11 @@
 // アプリ固有のプレフィックスを付けて他アプリとの衝突を防ぐ
 const STORAGE_KEYS = {
-  TRANSACTIONS:  'mmapp_transactions',
-  SETTINGS:      'mmapp_settings',
-  CURRENT_VIEW:  'mmapp_current_view',
-  RECURRING:     'mmapp_recurring',
+  TRANSACTIONS:      'mmapp_transactions',
+  SETTINGS:          'mmapp_settings',
+  CURRENT_VIEW:      'mmapp_current_view',
+  RECURRING:         'mmapp_recurring',
+  BUDGETS:           'mmapp_budgets',
+  CUSTOM_CATEGORIES: 'mmapp_custom_categories',
 };
 
 // async/await で書いておくと、将来 fetch() に差し替えるときに呼び出し側を変えなくて済む
@@ -72,5 +74,39 @@ async function saveRecurring(recurring) {
     localStorage.setItem(STORAGE_KEYS.RECURRING, JSON.stringify(recurring));
   } catch (e) {
     console.error('繰り返し取引の保存に失敗しました:', e);
+  }
+}
+
+async function loadBudgets() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.BUDGETS);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+async function saveBudgets(budgets) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.BUDGETS, JSON.stringify(budgets));
+  } catch (e) {
+    console.error('予算の保存に失敗しました:', e);
+  }
+}
+
+async function loadCustomCategories() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_CATEGORIES);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+async function saveCustomCategories(cats) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_CATEGORIES, JSON.stringify(cats));
+  } catch (e) {
+    console.error('カテゴリの保存に失敗しました:', e);
   }
 }

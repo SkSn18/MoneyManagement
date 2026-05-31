@@ -169,8 +169,9 @@ function renderDashboard(container) {
 }
 
 function renderCategoryBreakdown(displayTxs, totalExpense) {
-  const byCategory = calcSummaryByCategory(displayTxs, 'expense');
-  const entries = Object.entries(byCategory)
+  const { budgets } = getState();
+  const byCategory  = calcSummaryByCategory(displayTxs, 'expense');
+  const entries     = Object.entries(byCategory)
     .map(([catId, amount]) => ({ cat: getCategoryById(catId), amount }))
     .filter(e => e.cat)
     .sort((a, b) => b.amount - a.amount);
@@ -179,13 +180,33 @@ function renderCategoryBreakdown(displayTxs, totalExpense) {
     return '<p class="empty-text">支出データがありません</p>';
   }
 
-  return `<ul class="cat-list">${entries.map(({ cat, amount }) => {
-    const pct = totalExpense > 0 ? Math.round(amount / totalExpense * 100) : 0;
+  const overBudget = entries.filter(({ cat, amount }) => budgets[cat.id] > 0 && amount > budgets[cat.id]);
+  const alertHtml  = overBudget.length > 0
+    ? `<div class="budget-alert">⚠️ ${overBudget.map(e => e.cat.name).join('・')} が予算を超過しています</div>`
+    : '';
+
+  return alertHtml + `<ul class="cat-list">${entries.map(({ cat, amount }) => {
+    const pct    = totalExpense > 0 ? Math.round(amount / totalExpense * 100) : 0;
+    const budget = budgets[cat.id] || 0;
+    let budgetHtml = '';
+    if (budget > 0) {
+      const ratio  = amount / budget;
+      const barPct = Math.min(ratio * 100, 100).toFixed(1);
+      const cls    = ratio > 1 ? 'over' : ratio >= 0.8 ? 'warn' : 'ok';
+      budgetHtml = `
+        <div class="budget-bar"><div class="budget-bar-fill budget-bar-fill--${cls}" style="width:${barPct}%"></div></div>
+        <span class="budget-label budget-label--${cls}">${formatAmount(amount)} / ${formatAmount(budget)}${ratio > 1 ? ' 超過' : ''}</span>`;
+    }
     return `<li class="cat-item">
       <span class="tx-icon">${cat.icon}</span>
-      <span class="cat-item-name">${cat.name}</span>
-      <span class="cat-item-amount">${formatAmount(amount)}</span>
-      <span class="cat-item-pct">${pct}%</span>
+      <div class="cat-item-main">
+        <div class="cat-item-row">
+          <span class="cat-item-name">${cat.name}</span>
+          <span class="cat-item-amount">${formatAmount(amount)}</span>
+          <span class="cat-item-pct">${pct}%</span>
+        </div>
+        ${budgetHtml}
+      </div>
     </li>`;
   }).join('')}</ul>`;
 }
