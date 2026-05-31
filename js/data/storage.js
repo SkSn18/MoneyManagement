@@ -1,7 +1,8 @@
 // アプリ固有のプレフィックスを付けて他アプリとの衝突を防ぐ
 const STORAGE_KEYS = {
-  TRANSACTIONS: 'mmapp_transactions',
-  SETTINGS:     'mmapp_settings',
+  TRANSACTIONS:  'mmapp_transactions',
+  SETTINGS:      'mmapp_settings',
+  CURRENT_VIEW:  'mmapp_current_view',
 };
 
 // async/await で書いておくと、将来 fetch() に差し替えるときに呼び出し側を変えなくて済む
@@ -21,7 +22,7 @@ async function saveTransactions(transactions) {
   } catch (e) {
     // localStorage の容量上限（約5MB）に達したとき
     console.error('取引データの保存に失敗しました:', e);
-    alert('保存に失敗しました。ストレージの空き容量を確認してください。');
+    showBanner('error', '保存に失敗しました。ストレージの空き容量を確認してください。');
   }
 }
 
@@ -39,5 +40,19 @@ async function saveSettings(settings) {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
   } catch (e) {
     console.error('設定の保存に失敗しました:', e);
+  }
+}
+
+function saveCurrentView(view) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_VIEW, view);
+  } catch (e) {}
+}
+
+function loadCurrentView() {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.CURRENT_VIEW) || 'dashboard';
+  } catch (e) {
+    return 'dashboard';
   }
 }

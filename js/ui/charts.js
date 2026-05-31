@@ -1,5 +1,5 @@
 // グラフ描画（Chart.js を使用）
-// Chart インスタンスをモジュールスコープで保持し、再描画前に destroy してメモリリークを防ぐ
+// Chart インスタンスをモジュールスコープで保持し、同一 canvas への再描画は update() で行う
 
 Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif";
 Chart.defaults.color = '#64748b';
@@ -13,11 +13,6 @@ const _CHART_COLORS = [
 ];
 
 function renderExpensePieChart(canvasId, transactions) {
-  if (_pieChart) {
-    _pieChart.destroy();
-    _pieChart = null;
-  }
-
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
@@ -28,6 +23,7 @@ function renderExpensePieChart(canvasId, transactions) {
   const entries = Object.entries(byCategory).filter(([, v]) => v > 0);
 
   if (entries.length === 0) {
+    if (_pieChart) { _pieChart.destroy(); _pieChart = null; }
     canvas.style.display = 'none';
     const msg = document.createElement('p');
     msg.className = 'chart-empty-text empty-text';
@@ -44,6 +40,16 @@ function renderExpensePieChart(canvasId, transactions) {
   });
   const data   = entries.map(([, v]) => v);
   const colors = entries.map((_, i) => _CHART_COLORS[i % _CHART_COLORS.length]);
+
+  if (_pieChart && _pieChart.canvas === canvas) {
+    _pieChart.data.labels                      = labels;
+    _pieChart.data.datasets[0].data            = data;
+    _pieChart.data.datasets[0].backgroundColor = colors;
+    _pieChart.update();
+    return;
+  }
+
+  if (_pieChart) { _pieChart.destroy(); _pieChart = null; }
 
   _pieChart = new Chart(canvas, {
     type: 'doughnut',
@@ -80,11 +86,6 @@ function renderExpensePieChart(canvasId, transactions) {
 }
 
 function renderMonthlyBarChart(canvasId, allTransactions, currentYearMonth, count) {
-  if (_barChart) {
-    _barChart.destroy();
-    _barChart = null;
-  }
-
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
@@ -92,6 +93,16 @@ function renderMonthlyBarChart(canvasId, allTransactions, currentYearMonth, coun
   const labels      = months.map(m => formatYearMonth(m.ym));
   const incomeData  = months.map(m => m.income);
   const expenseData = months.map(m => m.expense);
+
+  if (_barChart && _barChart.canvas === canvas) {
+    _barChart.data.labels           = labels;
+    _barChart.data.datasets[0].data = incomeData;
+    _barChart.data.datasets[1].data = expenseData;
+    _barChart.update();
+    return;
+  }
+
+  if (_barChart) { _barChart.destroy(); _barChart = null; }
 
   _barChart = new Chart(canvas, {
     type: 'bar',

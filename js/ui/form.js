@@ -56,36 +56,36 @@ function renderFormRow(row) {
 
   return `
     <tr data-row-id="${row._id}">
-      <td>
+      <td data-label="日付">
         <input type="date" class="${dateClass} row-input" data-field="date"
           value="${escapeHtml(row.date)}">
         ${row.errors.date ? `<span class="form-error">${row.errors.date}</span>` : ''}
       </td>
-      <td>
+      <td data-label="種別">
         <select class="form-select row-input" data-field="type">
           ${typeOptions}
         </select>
       </td>
-      <td>
+      <td data-label="カテゴリ">
         <select class="${catClass} row-input" data-field="categoryId">
           <option value="">選択</option>
           ${buildCategoryOptions(row.type, row.categoryId)}
         </select>
         ${row.errors.categoryId ? `<span class="form-error">${row.errors.categoryId}</span>` : ''}
       </td>
-      <td>
+      <td data-label="金額（円）">
         <input type="number" class="${amountClass} row-input" data-field="amount"
           min="1" max="100000000" placeholder="500"
           value="${escapeHtml(row.amount)}">
         ${row.errors.amount ? `<span class="form-error">${row.errors.amount}</span>` : ''}
       </td>
-      <td>
+      <td data-label="メモ">
         <input type="text" class="form-input row-input" data-field="memo"
           maxlength="100" placeholder="任意"
           value="${escapeHtml(row.memo || '')}">
         ${row.errors.memo ? `<span class="form-error">${row.errors.memo}</span>` : ''}
       </td>
-      <td>
+      <td class="form-table-delete-cell">
         <button type="button" class="btn btn--icon btn-row-delete"
           data-row-id="${row._id}" title="削除">🗑</button>
       </td>
@@ -180,7 +180,7 @@ function renderForm(container) {
   const btnDelete = document.getElementById('btn-delete');
   if (btnDelete) {
     btnDelete.addEventListener('click', async () => {
-      if (!confirm('この取引を削除しますか？')) return;
+      if (!await showConfirmModal('この取引を削除しますか？')) return;
       btnDelete.disabled = true;
       const updated = await deleteTransaction(_editingId);
       setState({ transactions: updated, currentView: 'list', editingId: null });
@@ -208,9 +208,9 @@ function renderForm(container) {
 
       if (valid.length === 0) {
         const detail = errors.length > 0
-          ? `\n\nエラー（先頭5件）:\n${errors.slice(0, 5).join('\n')}`
+          ? ` (${errors.slice(0, 3).join(' / ')})`
           : '';
-        alert(`取り込める行がありませんでした。${detail}`);
+        showBanner('error', `取り込める行がありませんでした。${detail}`);
         e.target.value = '';
         return;
       }
@@ -234,7 +234,7 @@ function renderForm(container) {
       e.target.value = '';
 
       if (errors.length > 0) {
-        alert(`${valid.length}行を取り込みました。\nエラーのため${errors.length}行をスキップしました。`);
+        showBanner('error', `${valid.length}行を取り込みました。エラーのため${errors.length}行をスキップしました。`);
       }
     });
 
@@ -301,6 +301,8 @@ function renderForm(container) {
 
     if (hasErrors) {
       rerenderTableBody();
+      const firstError = document.querySelector('.form-input--error, .form-select--error');
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 

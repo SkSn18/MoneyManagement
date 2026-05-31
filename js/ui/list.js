@@ -1,10 +1,20 @@
 function renderList(container) {
-  const state = getState();
-  const ym    = state.currentYearMonth;
+  const state   = getState();
+  const ym      = state.currentYearMonth;
+  const keyword = state.filterKeyword.trim().toLowerCase();
 
   const filtered = state.transactions
     .filter(t => t.date.startsWith(ym))
     .filter(t => state.filterType === 'all' || t.type === state.filterType)
+    .filter(t => {
+      if (!keyword) return true;
+      const cat = getCategoryById(t.categoryId);
+      return (
+        (t.memo && t.memo.toLowerCase().includes(keyword)) ||
+        String(t.amount).startsWith(keyword) ||
+        (cat && cat.name.toLowerCase().includes(keyword))
+      );
+    })
     .sort((a, b) => b.date.localeCompare(a.date));
 
   const filterTypes = ['all', 'income', 'expense', 'asset'];
@@ -31,14 +41,20 @@ function renderList(container) {
         }).join('')}
       </div>
 
+      <div class="search-bar">
+        <input class="form-input" type="search" id="input-search"
+          placeholder="メモ・カテゴリ・金額で絞り込み"
+          value="${escapeHtml(state.filterKeyword)}">
+      </div>
+
       ${filtered.length === 0
-        ? '<p class="empty-text">取引はありません</p>'
+        ? `<p class="empty-text">${keyword ? '該当する取引はありません' : '取引はありません'}</p>`
         : `<ul class="tx-list">${filtered.map(renderTxItemWithActions).join('')}</ul>`}
     </div>
   `;
 
   document.getElementById('select-ym').addEventListener('change', e => {
-    setState({ currentYearMonth: e.target.value, filterType: 'all' });
+    setState({ currentYearMonth: e.target.value, filterType: 'all', filterKeyword: '' });
   });
 
   // CSVエクスポート（表示中のデータをダウンロード）
@@ -47,6 +63,10 @@ function renderList(container) {
     const label    = formatYearMonth(ym).replace('年', '-').replace('月', '');
     const filename = `家計簿_${label}.csv`;
     downloadCsv(csv, filename);
+  });
+
+  document.getElementById('input-search').addEventListener('input', e => {
+    setState({ filterKeyword: e.target.value });
   });
 
   container.querySelectorAll('.filter-btn').forEach(btn => {
@@ -63,7 +83,7 @@ function renderList(container) {
   container.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
-      if (!confirm('この取引を削除しますか？')) return;
+      if (!await showConfirmModal('この取引を削除しますか？')) return;
       btn.disabled = true;
       const updated = await deleteTransaction(btn.dataset.id);
       setState({ transactions: updated });
