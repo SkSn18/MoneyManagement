@@ -26,7 +26,8 @@ setRenderer(renderApp);
 
 async function init() {
   const transactions = await getAllTransactions();
-  setState({ transactions });
+  const savedView    = loadCurrentView();
+  setState({ transactions, currentView: savedView });
 }
 
 init();

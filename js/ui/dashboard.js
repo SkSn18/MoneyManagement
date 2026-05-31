@@ -42,6 +42,10 @@ function renderDashboard(container) {
 
   const barTitle = mode === 'cumulative' ? '月次収支（全期間）' : '月次収支（直近12ヶ月）';
 
+  // chart canvas を保持して DOM の連続性を維持（Chart.update() による再描画のため）
+  const existingPieCanvas = container.querySelector('#chart-expense-pie');
+  const existingBarCanvas = container.querySelector('#chart-monthly-bar');
+
   container.innerHTML = `
     <div class="page">
       <div class="page-header">
@@ -94,6 +98,13 @@ function renderDashboard(container) {
 
       <div class="section">
         <div class="section-header">
+          <h2 class="section-title">カテゴリ別支出</h2>
+        </div>
+        ${renderCategoryBreakdown(displayTxs, summary.expense)}
+      </div>
+
+      <div class="section">
+        <div class="section-header">
           <h2 class="section-title">直近の取引</h2>
           <button class="btn btn--text" id="btn-view-all">すべて見る</button>
         </div>
@@ -103,6 +114,16 @@ function renderDashboard(container) {
       </div>
     </div>
   `;
+
+  // 既存の chart canvas を DOM に戻して Chart インスタンスを再利用可能にする
+  if (existingPieCanvas) {
+    const ph = container.querySelector('#chart-expense-pie');
+    if (ph) ph.replaceWith(existingPieCanvas);
+  }
+  if (existingBarCanvas) {
+    const ph = container.querySelector('#chart-monthly-bar');
+    if (ph) ph.replaceWith(existingBarCanvas);
+  }
 
   if (mode === 'monthly') {
     document.getElementById('select-ym').addEventListener('change', e => {
@@ -126,6 +147,28 @@ function renderDashboard(container) {
 
   renderExpensePieChart('chart-expense-pie', displayTxs);
   renderMonthlyBarChart('chart-monthly-bar', allTxs, chartYm, barCount);
+}
+
+function renderCategoryBreakdown(displayTxs, totalExpense) {
+  const byCategory = calcSummaryByCategory(displayTxs, 'expense');
+  const entries = Object.entries(byCategory)
+    .map(([catId, amount]) => ({ cat: getCategoryById(catId), amount }))
+    .filter(e => e.cat)
+    .sort((a, b) => b.amount - a.amount);
+
+  if (entries.length === 0) {
+    return '<p class="empty-text">支出データがありません</p>';
+  }
+
+  return `<ul class="cat-list">${entries.map(({ cat, amount }) => {
+    const pct = totalExpense > 0 ? Math.round(amount / totalExpense * 100) : 0;
+    return `<li class="cat-item">
+      <span class="tx-icon">${cat.icon}</span>
+      <span class="cat-item-name">${cat.name}</span>
+      <span class="cat-item-amount">${formatAmount(amount)}</span>
+      <span class="cat-item-pct">${pct}%</span>
+    </li>`;
+  }).join('')}</ul>`;
 }
 
 // 取引1件分の <li> HTML を返す（ダッシュボード・一覧で共用）

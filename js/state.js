@@ -7,6 +7,7 @@ const appState = {
   transactions:     [],
   editingId:        null,
   filterType:       'all',
+  filterKeyword:    '',
   displayMode:      'monthly',  // 'monthly' | 'yearly' | 'cumulative'
 };
 
@@ -19,6 +20,7 @@ function setRenderer(fn) {
 // setState({ currentView: 'list' }) のように差分だけ渡す
 function setState(partial) {
   Object.assign(appState, partial);
+  if (partial.currentView) saveCurrentView(partial.currentView);
   if (_renderer) _renderer();
 }
 
