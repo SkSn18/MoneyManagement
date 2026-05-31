@@ -426,3 +426,50 @@
   display: flex;
   gap: 4px;
 }
+
+/* ==========================================
+   アイコンピッカー（カテゴリ管理）
+   ========================================== */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.icon-btn {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+  line-height: 1;
+  transition: background .1s, border-color .1s;
+}
+
+.icon-btn:hover {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+.icon-btn--selected {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.cat-edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.cat-edit-icon-wrap {
+  display: flex;
+  flex-direction: column;
+}
