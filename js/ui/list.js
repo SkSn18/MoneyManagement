@@ -19,17 +19,29 @@ function renderList(container) {
 
   const filterTypes = ['all', 'income', 'expense', 'asset'];
 
-  // 月プルダウン選択肢（新しい順）
-  const monthRange = getMonthRange(state.transactions).slice().reverse();
-  const ymOptions  = monthRange.map(m =>
-    `<option value="${m}"${m === ym ? ' selected' : ''}>${formatYearMonth(m)}</option>`
+  // 年・月プルダウン選択肢（新しい順）
+  const monthRange    = getMonthRange(state.transactions).slice().reverse();
+  const selYear       = ym.slice(0, 4);
+  const selMonth      = ym.slice(5);
+  const years         = [...new Set(monthRange.map(m => m.slice(0, 4)))];
+  const monthsForYear = monthRange.filter(m => m.startsWith(selYear));
+
+  const yearOpts = years.map(y =>
+    `<option value="${y}"${y === selYear ? ' selected' : ''}>${y}年</option>`
   ).join('');
+  const monthOpts = monthsForYear.map(m => {
+    const mo = m.slice(5);
+    return `<option value="${mo}"${mo === selMonth ? ' selected' : ''}>${parseInt(mo)}月</option>`;
+  }).join('');
 
   container.innerHTML = `
     <div class="page">
       <div class="page-header">
         <h1 class="page-title">取引一覧</h1>
-        <select class="form-select select-ym" id="select-ym">${ymOptions}</select>
+        <div class="ym-picker">
+          <select class="form-select" id="select-year">${yearOpts}</select>
+          <select class="form-select" id="select-month">${monthOpts}</select>
+        </div>
         <button class="btn btn--ghost" id="btn-export">CSV出力</button>
       </div>
 
@@ -53,8 +65,15 @@ function renderList(container) {
     </div>
   `;
 
-  document.getElementById('select-ym').addEventListener('change', e => {
-    setState({ currentYearMonth: e.target.value, filterType: 'all', filterKeyword: '' });
+  document.getElementById('select-year').addEventListener('change', e => {
+    const year = e.target.value;
+    const mfy  = monthRange.filter(m => m.startsWith(year));
+    const kept = mfy.find(m => m.slice(5) === selMonth);
+    setState({ currentYearMonth: kept || mfy[0], filterType: 'all', filterKeyword: '' });
+  });
+
+  document.getElementById('select-month').addEventListener('change', e => {
+    setState({ currentYearMonth: `${selYear}-${e.target.value}`, filterType: 'all', filterKeyword: '' });
   });
 
   // CSVエクスポート（表示中のデータをダウンロード）

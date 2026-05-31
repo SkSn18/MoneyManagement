@@ -166,18 +166,17 @@ body {
 }
 
 /* ==========================================
-   月プルダウン（ダッシュボード・一覧）
+   年月ピッカー（ダッシュボード・一覧）
    ========================================== */
-.select-ym {
-  width: auto;
-  max-width: 160px;
-  font-size: 14px;
-  padding: 6px 10px;
+.ym-picker {
+  display: flex;
+  gap: 4px;
 }
 
-.select-ym--hidden {
-  visibility: hidden;
-  pointer-events: none;
+.ym-picker .form-select {
+  width: auto;
+  font-size: 14px;
+  padding: 6px 10px;
 }
 
 /* ==========================================
