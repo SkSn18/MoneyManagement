@@ -34,11 +34,20 @@ function renderDashboard(container) {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5);
 
-  // 月プルダウン選択肢（単月モードのみ表示、新しい順）
-  const monthRange = getMonthRange(allTxs).slice().reverse();
-  const ymOptions  = monthRange.map(m =>
-    `<option value="${m}"${m === ym ? ' selected' : ''}>${formatYearMonth(m)}</option>`
+  // 年・月プルダウン（単月モードのみ表示、新しい順）
+  const monthRange    = getMonthRange(allTxs).slice().reverse();
+  const selYear       = ym.slice(0, 4);
+  const selMonth      = ym.slice(5);
+  const years         = [...new Set(monthRange.map(m => m.slice(0, 4)))];
+  const monthsForYear = monthRange.filter(m => m.startsWith(selYear));
+
+  const yearOpts = years.map(y =>
+    `<option value="${y}"${y === selYear ? ' selected' : ''}>${y}年</option>`
   ).join('');
+  const monthOpts = monthsForYear.map(m => {
+    const mo = m.slice(5);
+    return `<option value="${mo}"${mo === selMonth ? ' selected' : ''}>${parseInt(mo)}月</option>`;
+  }).join('');
 
   const barTitle = mode === 'cumulative' ? '月次収支（全期間）' : '月次収支（直近12ヶ月）';
 
@@ -50,8 +59,12 @@ function renderDashboard(container) {
     <div class="page">
       <div class="page-header">
         <h1 class="page-title">${titleText}</h1>
-        <select class="form-select select-ym${mode !== 'monthly' ? ' select-ym--hidden' : ''}"
-          id="select-ym">${ymOptions}</select>
+        ${mode === 'monthly' ? `
+          <div class="ym-picker">
+            <select class="form-select" id="select-year">${yearOpts}</select>
+            <select class="form-select" id="select-month">${monthOpts}</select>
+          </div>
+        ` : ''}
       </div>
 
       <div class="mode-tabs">
@@ -126,8 +139,14 @@ function renderDashboard(container) {
   }
 
   if (mode === 'monthly') {
-    document.getElementById('select-ym').addEventListener('change', e => {
-      setState({ currentYearMonth: e.target.value });
+    document.getElementById('select-year').addEventListener('change', e => {
+      const year = e.target.value;
+      const mfy  = monthRange.filter(m => m.startsWith(year));
+      const kept = mfy.find(m => m.slice(5) === selMonth);
+      setState({ currentYearMonth: kept || mfy[0] });
+    });
+    document.getElementById('select-month').addEventListener('change', e => {
+      setState({ currentYearMonth: `${selYear}-${e.target.value}` });
     });
   }
 

@@ -8,7 +8,7 @@ function showBanner(type, message) {
   el._timer = setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
-function showConfirmModal(message) {
+function showConfirmModal(message, confirmLabel = '削除する') {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -17,7 +17,7 @@ function showConfirmModal(message) {
         <p class="modal-message">${message}</p>
         <div class="modal-actions">
           <button class="btn btn--ghost" id="modal-cancel">キャンセル</button>
-          <button class="btn btn--danger" id="modal-confirm">削除する</button>
+          <button class="btn btn--danger" id="modal-confirm">${confirmLabel}</button>
         </div>
       </div>
     `;
