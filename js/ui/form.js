@@ -119,9 +119,12 @@ function renderForm(container) {
 
       ${!_editingId ? `
       <div class="form-actions-top">
-        <input type="file" id="input-csv-import" accept=".csv" style="display:none">
+        <input type="file" id="input-csv-import"  accept=".csv"  style="display:none">
+        <input type="file" id="input-json-import" accept=".json" style="display:none">
         <button class="btn btn--ghost" id="btn-import">CSV取込</button>
         <button class="btn btn--ghost" id="btn-template">CSVレイアウト出力</button>
+        <button class="btn btn--ghost" id="btn-json-export">バックアップ出力</button>
+        <button class="btn btn--ghost" id="btn-json-restore">バックアップ復元</button>
       </div>
       ` : ''}
 
@@ -242,6 +245,43 @@ function renderForm(container) {
       syncRowsFromDom();
       _rows.push(createEmptyRow());
       rerenderTableBody();
+    });
+
+    // JSON バックアップ出力
+    document.getElementById('btn-json-export').addEventListener('click', () => {
+      const { transactions } = getState();
+      const date = new Date().toISOString().slice(0, 10);
+      downloadJson(transactions, `家計簿_バックアップ_${date}.json`);
+    });
+
+    // JSON バックアップ復元
+    document.getElementById('btn-json-restore').addEventListener('click', () => {
+      document.getElementById('input-json-import').click();
+    });
+
+    document.getElementById('input-json-import').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const text = await file.text();
+      const { transactions, error } = parseJsonBackup(text);
+
+      if (error) {
+        showBanner('error', error);
+        e.target.value = '';
+        return;
+      }
+
+      const confirmed = await showConfirmModal(
+        `${transactions.length}件のデータで復元します。現在のデータはすべて上書きされます。続けますか？`,
+        '復元する'
+      );
+      if (!confirmed) { e.target.value = ''; return; }
+
+      const updated = await replaceAllTransactions(transactions);
+      e.target.value = '';
+      setState({ transactions: updated, currentView: 'dashboard', editingId: null });
+      showBanner('success', `${updated.length}件のデータを復元しました。`);
     });
   }
 

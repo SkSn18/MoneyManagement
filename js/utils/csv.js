@@ -125,6 +125,32 @@ function downloadCsvTemplate() {
   downloadCsv('日付,種別,カテゴリ,金額,メモ', '家計簿_取込テンプレート.csv');
 }
 
+// 全取引データを JSON ファイルとしてダウンロードする
+function downloadJson(transactions, filename) {
+  const payload = { version: 1, exportedAt: new Date().toISOString(), transactions };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// JSON バックアップ文字列を解析して取引配列を返す
+// 戻り値: { transactions: Transaction[]|null, error: string|null }
+function parseJsonBackup(jsonString) {
+  let data;
+  try { data = JSON.parse(jsonString); } catch {
+    return { transactions: null, error: 'JSONの解析に失敗しました。ファイルを確認してください。' };
+  }
+  if (!data || !Array.isArray(data.transactions)) {
+    return { transactions: null, error: 'バックアップファイルの形式が正しくありません。' };
+  }
+  return { transactions: data.transactions, error: null };
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { escapeCsvField, transactionsToCsv, parseCsv, csvToTransactions, downloadCsvTemplate };
+  module.exports = { escapeCsvField, transactionsToCsv, parseCsv, csvToTransactions, downloadCsvTemplate, downloadJson, parseJsonBackup };
 }

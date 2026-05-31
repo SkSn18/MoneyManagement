@@ -67,6 +67,11 @@ async function deleteTransaction(id) {
   return filtered;
 }
 
+async function replaceAllTransactions(transactions) {
+  await saveTransactions(transactions);
+  return transactions;
+}
+
 function calcSummary(transactions) {
   let income  = 0;
   let expense = 0;
@@ -106,5 +111,5 @@ function calcMonthlySummary(allTransactions, baseYearMonth, count) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { calcSummary, calcSummaryByCategory, calcMonthlySummary, addTransactions };
+  module.exports = { calcSummary, calcSummaryByCategory, calcMonthlySummary, addTransactions, replaceAllTransactions };
 }
