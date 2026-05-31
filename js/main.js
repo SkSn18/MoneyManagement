@@ -26,13 +26,16 @@ document.querySelectorAll('[data-view]').forEach(el => {
 setRenderer(renderApp);
 
 async function init() {
-  const [transactions, recurring] = await Promise.all([
+  const [transactions, recurring, customCategories, budgets] = await Promise.all([
     getAllTransactions(),
     loadRecurring(),
+    loadCustomCategories(),
+    loadBudgets(),
   ]);
+  initCategories(customCategories);
   const withRecurring = await applyRecurringForMonth(getCurrentYearMonth(), recurring);
   const savedView     = loadCurrentView();
-  setState({ transactions: withRecurring, recurring, currentView: savedView });
+  setState({ transactions: withRecurring, recurring, customCategories, budgets, currentView: savedView });
 }
 
 init();

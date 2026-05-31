@@ -1,5 +1,5 @@
 // 将来のDB化に備え、id でカテゴリを参照する設計にしている
-const CATEGORIES = [
+const _BUILTIN_CATEGORIES = [
   // --- 支出 ---
   { id: 'rent',        name: '家賃',       type: 'expense', icon: '🏠' },
   { id: 'food',        name: '食費',       type: 'expense', icon: '🍚' },
@@ -20,10 +20,21 @@ const CATEGORIES = [
   { id: 'other_asset', name: 'その他資産', type: 'asset',   icon: '🪙' },
 ];
 
+let _categories = [..._BUILTIN_CATEGORIES];
+
+// 起動時およびカスタムカテゴリ変更時に呼び出す
+function initCategories(customCats) {
+  _categories = [..._BUILTIN_CATEGORIES, ...(customCats || [])];
+}
+
 function getCategoriesByType(type) {
-  return CATEGORIES.filter(c => c.type === type);
+  return _categories.filter(c => c.type === type);
 }
 
 function getCategoryById(id) {
-  return CATEGORIES.find(c => c.id === id) || null;
+  return _categories.find(c => c.id === id) || null;
+}
+
+function isBuiltinCategory(id) {
+  return _BUILTIN_CATEGORIES.some(c => c.id === id);
 }
