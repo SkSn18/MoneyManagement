@@ -411,13 +411,53 @@ body {
 }
 
 /* ==========================================
+   カテゴリ別集計リスト
+   ========================================== */
+.cat-list {
+  list-style: none;
+}
+
+.cat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.cat-item:last-child { border-bottom: none; padding-bottom: 0; }
+.cat-item:first-child { padding-top: 0; }
+
+.cat-item-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.cat-item-amount {
+  font-weight: 600;
+  color: var(--color-expense);
+}
+
+.cat-item-pct {
+  color: var(--color-muted);
+  font-size: 13px;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ==========================================
    フィルタバー（取引一覧）
    ========================================== */
 .filter-bar {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
+}
+
+.search-bar {
+  margin-bottom: 16px;
 }
 
 .filter-btn {
@@ -459,23 +499,131 @@ body {
 .text-danger { color: var(--color-expense); }
 
 /* ==========================================
-   レスポンシブ（スマホ幅）
+   ボトムナビゲーション（デフォルト非表示）
    ========================================== */
-@media (max-width: 480px) {
-  .summary-amount {
-    font-size: 17px;
+.bottom-nav {
+  display: none;
+}
+
+/* ==========================================
+   レスポンシブ（600px 以下：スマートフォン）
+   ========================================== */
+@media (max-width: 600px) {
+  /* 上部ナビリンクを非表示 */
+  .nav-links { display: none; }
+
+  /* ボトムナビを表示 */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--color-card);
+    border-top: 1px solid var(--color-border);
+    z-index: 20;
   }
 
-  .nav-link {
-    padding: 6px 8px;
-    font-size: 13px;
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    color: var(--color-muted);
+    transition: color .15s;
   }
 
-  .page-title {
-    font-size: 17px;
+  .bottom-nav-item.nav-link--active { color: var(--color-primary); }
+
+  .bottom-nav-item--add {
+    color: var(--color-primary);
+    font-weight: 700;
   }
 
-  .charts-grid {
-    grid-template-columns: 1fr;
+  .bottom-nav-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-label { font-size: 10px; }
+
+  /* ボトムナビ分のパディング */
+  .main { padding-bottom: 72px; }
+
+  /* フォームテーブル → カードレイアウト */
+  .form-table {
+    display: block;
+    min-width: unset;
   }
+
+  .form-table thead { display: none; }
+  .form-table tbody { display: block; }
+
+  .form-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--color-card);
+  }
+
+  .form-table td {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+    vertical-align: unset;
+  }
+
+  .form-table tr:last-child td { border-bottom: none; }
+
+  /* td ラベル */
+  .form-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    color: var(--color-muted);
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+
+  /* 日付: 左列、種別: 右列 */
+  .form-table td:nth-child(1) { grid-column: 1; }
+  .form-table td:nth-child(2) { grid-column: 2; }
+  /* カテゴリ: 全幅 */
+  .form-table td:nth-child(3) { grid-column: 1 / -1; }
+  /* 金額: 左列、メモ: 右列 */
+  .form-table td:nth-child(4) { grid-column: 1; }
+  .form-table td:nth-child(5) { grid-column: 2; }
+  /* 削除ボタン: 全幅右寄せ */
+  .form-table-delete-cell {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .form-table-delete-cell::before { display: none; }
+
+  /* フィルタボタンのタッチターゲット */
+  .filter-btn {
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  /* 取引リストの余白縮小 */
+  .tx-item { gap: 8px; }
+
+  /* 既存ブレークポイントの調整項目 */
+  .summary-amount { font-size: 17px; }
+  .page-title { font-size: 17px; }
+  .charts-grid { grid-template-columns: 1fr; }
+}
+
+/* ==========================================
+   レスポンシブ（375px 以下：超小画面）
+   ========================================== */
+@media (max-width: 375px) {
+  .summary-grid { grid-template-columns: 1fr; }
 }
