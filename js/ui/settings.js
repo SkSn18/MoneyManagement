@@ -1,3 +1,27 @@
+const _ICON_LIST = [
+  '🏠','🍚','🚃','💡','🏥','📚','🎮','👕','📦','🛒',
+  '🎵','🎬','🐕','🚗','⛽','🏋️','💊','✈️','🍺','🎁',
+  '💼','💻','💰','📈','🏦','🪙','💎','🎯','🔑','📱',
+  '📌','⭐','🔖','📝','🎀','🌸','🌿','🧸','🎪','🏖️',
+];
+
+function buildIconPicker() {
+  return `<div class="icon-picker">
+    ${_ICON_LIST.map(ic => `<button type="button" class="icon-btn" data-icon="${ic}">${ic}</button>`).join('')}
+  </div>`;
+}
+
+function wireIconPicker(scope, inputId) {
+  scope.querySelectorAll('.icon-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = scope.querySelector(`#${inputId}`);
+      if (input) input.value = btn.dataset.icon;
+      scope.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--selected'));
+      btn.classList.add('icon-btn--selected');
+    });
+  });
+}
+
 function renderSettings(container) {
   const { recurring, budgets, customCategories } = getState();
   const expenseCats = getCategoriesByType('expense');
@@ -121,8 +145,9 @@ function renderSettings(container) {
               <input class="form-input" type="text" id="cat-name" maxlength="20" placeholder="例：ジム">
             </div>
             <div class="form-group">
-              <label class="form-label">アイコン（絵文字1文字）</label>
-              <input class="form-input" type="text" id="cat-icon" maxlength="4" placeholder="🏋️">
+              <label class="form-label">アイコン</label>
+              <input class="form-input" type="text" id="cat-icon" maxlength="4" placeholder="📌" style="width:64px;">
+              ${buildIconPicker()}
             </div>
             <div class="form-actions">
               <button class="btn btn--ghost" id="btn-cat-cancel">キャンセル</button>
@@ -136,7 +161,7 @@ function renderSettings(container) {
           <ul class="cat-manage-list">
             ${customCategories.map(cat => `
               <li class="cat-manage-item" data-id="${cat.id}">
-                <span class="tx-icon cat-manage-icon" id="icon-${cat.id}">${cat.icon}</span>
+                <span class="tx-icon cat-manage-icon">${cat.icon}</span>
                 <div class="cat-manage-info">
                   <span class="cat-manage-name">${escapeHtml(cat.name)}</span>
                   <span class="cat-manage-type">${formatType(cat.type)}</span>
@@ -230,6 +255,10 @@ function renderSettings(container) {
   document.getElementById('btn-cat-cancel').addEventListener('click', () => {
     catAddForm.style.display = 'none';
   });
+
+  // アイコンピッカー（追加フォーム）
+  wireIconPicker(catAddForm, 'cat-icon');
+
   document.getElementById('btn-cat-save').addEventListener('click', async () => {
     const type = document.getElementById('cat-type').value;
     const name = document.getElementById('cat-name').value.trim();
@@ -249,22 +278,29 @@ function renderSettings(container) {
   // ---- カテゴリ編集イベント ----
   container.querySelectorAll('.btn-cat-edit').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id   = btn.dataset.id;
-      const cat  = customCategories.find(c => c.id === id);
+      const id  = btn.dataset.id;
+      const cat = customCategories.find(c => c.id === id);
       if (!cat) return;
-      const li   = container.querySelector(`.cat-manage-item[data-id="${id}"]`);
+      const li  = container.querySelector(`.cat-manage-item[data-id="${id}"]`);
       if (!li) return;
 
       li.innerHTML = `
-        <input class="form-input" id="edit-icon-${id}" type="text" maxlength="4"
-          value="${escapeHtml(cat.icon)}" style="width:52px; text-align:center;">
-        <input class="form-input" id="edit-name-${id}" type="text" maxlength="20"
-          value="${escapeHtml(cat.name)}" style="flex:1;">
-        <div class="cat-manage-actions">
-          <button class="btn btn--primary btn-cat-edit-save" data-id="${id}">保存</button>
-          <button class="btn btn--ghost btn-cat-edit-cancel" data-id="${id}">取消</button>
+        <div class="cat-edit-row">
+          <div class="cat-edit-icon-wrap">
+            <input class="form-input" id="edit-icon-${id}" type="text" maxlength="4"
+              value="${escapeHtml(cat.icon)}" style="width:56px; text-align:center;">
+            ${buildIconPicker()}
+          </div>
+          <input class="form-input" id="edit-name-${id}" type="text" maxlength="20"
+            value="${escapeHtml(cat.name)}" style="flex:1;">
+          <div class="cat-manage-actions">
+            <button class="btn btn--primary btn-cat-edit-save" data-id="${id}">保存</button>
+            <button class="btn btn--ghost btn-cat-edit-cancel" data-id="${id}">取消</button>
+          </div>
         </div>
       `;
+
+      wireIconPicker(li, `edit-icon-${id}`);
 
       li.querySelector('.btn-cat-edit-cancel').addEventListener('click', () => {
         setState({ customCategories });
