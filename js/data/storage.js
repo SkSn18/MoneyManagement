@@ -3,6 +3,7 @@ const STORAGE_KEYS = {
   TRANSACTIONS:  'mmapp_transactions',
   SETTINGS:      'mmapp_settings',
   CURRENT_VIEW:  'mmapp_current_view',
+  RECURRING:     'mmapp_recurring',
 };
 
 // async/await で書いておくと、将来 fetch() に差し替えるときに呼び出し側を変えなくて済む
@@ -54,5 +55,22 @@ function loadCurrentView() {
     return localStorage.getItem(STORAGE_KEYS.CURRENT_VIEW) || 'dashboard';
   } catch (e) {
     return 'dashboard';
+  }
+}
+
+async function loadRecurring() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.RECURRING);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+async function saveRecurring(recurring) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.RECURRING, JSON.stringify(recurring));
+  } catch (e) {
+    console.error('繰り返し取引の保存に失敗しました:', e);
   }
 }

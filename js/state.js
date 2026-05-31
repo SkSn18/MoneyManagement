@@ -5,6 +5,7 @@ const appState = {
   currentView:      'dashboard',
   currentYearMonth: getCurrentYearMonth(),
   transactions:     [],
+  recurring:        [],
   editingId:        null,
   filterType:       'all',
   filterKeyword:    '',

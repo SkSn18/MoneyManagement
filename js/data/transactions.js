@@ -72,6 +72,41 @@ async function replaceAllTransactions(transactions) {
   return transactions;
 }
 
+// 当月の繰り返し取引を未登録のものだけ追加する（重複登録なし）
+async function applyRecurringForMonth(ym, recurringList) {
+  if (!recurringList || recurringList.length === 0) return loadTransactions();
+
+  const all     = await loadTransactions();
+  const [year, month] = ym.split('-').map(Number);
+  const lastDay = new Date(year, month, 0).getDate();
+  const now     = new Date().toISOString();
+  let changed   = false;
+
+  for (const r of recurringList) {
+    const alreadyApplied = all.some(t => t.recurringId === r.id && t.date.startsWith(ym));
+    if (alreadyApplied) continue;
+
+    const day  = Math.min(r.dayOfMonth, lastDay);
+    const date = `${ym}-${String(day).padStart(2, '0')}`;
+
+    all.push({
+      id:          crypto.randomUUID(),
+      type:        r.type,
+      amount:      r.amount,
+      categoryId:  r.categoryId,
+      date,
+      memo:        r.memo || '',
+      recurringId: r.id,
+      createdAt:   now,
+      updatedAt:   now,
+    });
+    changed = true;
+  }
+
+  if (changed) await saveTransactions(all);
+  return all;
+}
+
 function calcSummary(transactions) {
   let income  = 0;
   let expense = 0;

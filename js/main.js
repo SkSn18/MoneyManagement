@@ -11,6 +11,7 @@ function renderApp() {
     case 'dashboard': renderDashboard(appEl); break;
     case 'list':      renderList(appEl);      break;
     case 'form':      renderForm(appEl);      break;
+    case 'settings':  renderSettings(appEl);  break;
     default:          renderDashboard(appEl);
   }
 }
@@ -25,9 +26,13 @@ document.querySelectorAll('[data-view]').forEach(el => {
 setRenderer(renderApp);
 
 async function init() {
-  const transactions = await getAllTransactions();
-  const savedView    = loadCurrentView();
-  setState({ transactions, currentView: savedView });
+  const [transactions, recurring] = await Promise.all([
+    getAllTransactions(),
+    loadRecurring(),
+  ]);
+  const withRecurring = await applyRecurringForMonth(getCurrentYearMonth(), recurring);
+  const savedView     = loadCurrentView();
+  setState({ transactions: withRecurring, recurring, currentView: savedView });
 }
 
 init();
